@@ -34,6 +34,7 @@ CREATE TABLE replies (
 
   FOREIGN KEY (parent_id) REFERENCES replies(id)
   FOREIGN KEY (user_id) REFERENCES users(id)
+  FOREIGN KEY (question_id) REFERENCES questions(id)
 );
 
 CREATE TABLE question_likes (
