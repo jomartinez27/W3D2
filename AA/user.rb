@@ -1,3 +1,7 @@
+require 'sqlite3'
+require 'singleton'
+require_relative 'questions.rb'
+
 class User
   attr_accessor :fname, :lname
   attr_reader :id
