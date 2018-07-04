@@ -1,6 +1,6 @@
 require 'sqlite3'
 require 'singleton'
-require_relative 'questions.rb'
+require_relative 'student_questions'
 
 class QuestionFollow
   attr_reader :id, :user_id, :question_id

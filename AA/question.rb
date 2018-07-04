@@ -1,6 +1,8 @@
 require 'sqlite3'
 require 'singleton'
-require_relative 'questions.rb'
+require_relative 'student_questions'
+require_relative 'user'
+require_relative 'reply'
 
 
 class Question
@@ -21,9 +23,22 @@ class Question
       WHERE
         id = ?
     SQL
-    return nil unless id > 0
     
     Question.new(question.first)
+  end
+  
+  def self.find_by_author_id(user_id)
+    question = QuestionsDatabase.instance.execute(<<-SQL, user_id)
+      SELECT
+        *
+      FROM
+        questions
+      WHERE
+        user_id = ?
+    SQL
+    # return nil unless question.length > 0
+    # 
+    # Question.new(question.first)
   end
   
   def initialize(options)
@@ -54,5 +69,13 @@ class Question
       WHERE
         id = ?
     SQL
+  end
+  
+  def author
+    "#{User.find_by_id(@user_id).fname} #{User.find_by_id(@user_id).lname}"
+  end
+  
+  def replies
+    Reply.find_by_question_id(@id)
   end
 end

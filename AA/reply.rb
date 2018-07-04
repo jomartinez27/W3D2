@@ -1,6 +1,7 @@
 require 'sqlite3'
 require 'singleton'
-require_relative 'questions.rb'
+require_relative 'student_questions'
+require_relative 'question'
 
 class Reply
   attr_accessor :body
@@ -8,17 +9,28 @@ class Reply
   
   def self.all
     data = QuestionsDatabase.instance.execute("SELECT * FROM replies")
-    data.map { |datum| Question.new(datum) }
+    data.map { |datum| Reply.new(datum) }
   end
   
-  def self.find_by_id(id)
-    reply = QuestionsDatabase.instance.execute(<<-SQL, id)
+  def self.find_by_user_id(user_id)
+    reply = QuestionsDatabase.instance.execute(<<-SQL, user_id)
       SELECT
         *
       FROM
         replies
       WHERE
-        id = ?
+        user_id = ?
+    SQL
+  end
+  
+  def self.find_by_question_id(question_id)
+    reply = QuestionsDatabase.instance.execute(<<-SQL, question_id)
+      SELECT
+        *
+      FROM
+        replies
+      WHERE
+        question_id = ?
     SQL
   end
   
@@ -26,18 +38,19 @@ class Reply
     @id = options['id']
     @parent_id = options['parent_id']
     @question_id = options['question_id']
+    @body = options['body']
     @user_id = options['user_id']
   end
   
   def create
     raise "#{self} already in DB" if @id
-    QuestionsDatabase.instance.execute(<<-SQL, @parent_id, @question_id, @user_id)
+    QuestionsDatabase.instance.execute(<<-SQL, @parent_id, @question_id, @body, @user_id)
       INSERT INTO
-        replies (parent_id, question_id, user_id)
+        replies (parent_id, question_id, body, user_id)
       VALUES
-        (?, ?, ?)
+        (?, ?, ?, ?)
     SQL
-    @id = QuestionsDatabase.last_insert_row_id
+    @id = QuestionsDatabase.instance.last_insert_row_id
   end
   
   def update
@@ -50,5 +63,13 @@ class Reply
       WHERE
         id = ?
     SQL
+  end
+  
+  def author
+    "#{User.find_by_id(@user_id).fname} #{User.find_by_id(@user_id).lname}"
+  end
+  
+  def question
+    Question.find_by_id(@question_id)
   end
 end

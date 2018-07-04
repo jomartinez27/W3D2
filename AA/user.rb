@@ -1,6 +1,8 @@
 require 'sqlite3'
 require 'singleton'
-require_relative 'questions.rb'
+require_relative 'student_questions'
+require_relative 'question'
+require_relative 'reply'
 
 class User
   attr_accessor :fname, :lname
@@ -20,10 +22,9 @@ class User
       WHERE
         fname = ? AND lname = ?
     SQL
-    return nil unless fname.length > 0
-    return nil unless lname.length > 0
+    return nil unless user.length > 0
 
-    user.map { |datum| User.new(datum) }
+    User.new(user.first)
   end
   
   def self.find_by_id(id)
@@ -67,5 +68,13 @@ class User
       WHERE
         id = ?
     SQL
+  end
+  
+  def authored_questions
+    Question.find_by_author_id(@id)
+  end
+  
+  def authored_replies
+    Reply.find_by_user_id(@id)
   end
 end
